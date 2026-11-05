@@ -10,6 +10,30 @@
     body { background-color: #f4f6f9; color: #333; padding: 15px; max-width: 500px; margin: 0 auto; padding-bottom: 70px; }
     h1 { font-size: 1.4rem; text-align: center; margin-bottom: 15px; color: #1e293b; }
     
+    /* Overlay de Bloqueio por PIN */
+    #pin-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #f4f6f9; z-index: 9999; display: flex;
+      flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+    }
+    .pin-card {
+      background: white; padding: 24px; border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 340px; text-align: center;
+    }
+    .pin-card h2 { font-size: 1.2rem; color: #1e293b; margin-bottom: 8px; }
+    .pin-card p { font-size: 0.85rem; color: #64748b; margin-bottom: 16px; }
+    .pin-input {
+      width: 100%; padding: 12px; font-size: 1.5rem; text-align: center;
+      letter-spacing: 12px; border: 2px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px;
+    }
+    .pin-btn {
+      width: 100%; padding: 12px; background-color: #2563eb; color: white;
+      border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;
+    }
+    .pin-reset-link {
+      display: inline-block; margin-top: 14px; font-size: 0.8rem; color: #ef4444; text-decoration: underline; cursor: pointer;
+    }
+
     /* Navegação por Abas */
     .tabs { display: flex; background: #e2e8f0; border-radius: 8px; padding: 4px; margin-bottom: 20px; }
     .tab { flex: 1; text-align: center; padding: 10px; font-size: 0.9rem; font-weight: bold; cursor: pointer; border-radius: 6px; color: #64748b; }
@@ -54,6 +78,17 @@
 </head>
 <body>
 
+  <!-- Tela de Bloqueio por PIN -->
+  <div id="pin-screen">
+    <div class="pin-card">
+      <h2 id="pin-title">🔒 Acesso Protegido</h2>
+      <p id="pin-subtitle">Digite seu PIN de 4 dígitos para acessar</p>
+      <input type="password" id="pin-input" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
+      <button class="pin-btn" id="pin-btn" onclick="verificarPIN()">Entrar</button>
+      <div class="pin-reset-link" id="pin-reset-btn" onclick="redefinirPIN()">Esqueceu a senha / Redefinir PIN</div>
+    </div>
+  </div>
+
   <h1>⏰ Gestão e Lembrete de Contas</h1>
 
   <button class="btn-notification" id="btn-perm" onclick="solicitarNotificacao()">🔔 Ativar Notificações no Celular</button>
@@ -76,453 +111,4 @@
       <div class="form-group">
         <label for="bill-supplier">Fornecedor</label>
         <select id="bill-supplier" required>
-          <option value="">Selecione um fornecedor...</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="bill-value">Valor (R$)</label>
-        <input type="number" step="0.01" id="bill-value" placeholder="0,00" required>
-      </div>
-      <div class="form-group">
-        <label for="bill-date">Data de Vencimento</label>
-        <input type="date" id="bill-date" required>
-      </div>
-      <button class="btn-submit" id="btn-save-bill" onclick="salvarConta()">Adicionar Conta</button>
-      <button class="btn-cancel" id="btn-cancel-bill" onclick="limparFormularioConta()">Cancelar Edição</button>
-    </div>
-
-    <h2>Suas Contas</h2>
-    <div id="bill-list" style="margin-top: 10px;"></div>
-  </div>
-
-  <!-- ABA 2: FORNECEDORES -->
-  <div id="view-fornecedores" class="view-section">
-    <div class="card">
-      <input type="hidden" id="supplier-id">
-      <div class="form-group">
-        <label for="supplier-name">Nome do Fornecedor</label>
-        <input type="text" id="supplier-name" placeholder="Ex: Enel, Claro, Sabesp" required>
-      </div>
-      <button class="btn-submit" id="btn-save-supplier" onclick="salvarFornecedor()">Cadastrar Fornecedor</button>
-      <button class="btn-cancel" id="btn-cancel-supplier" onclick="limparFormularioFornecedor()">Cancelar Edição</button>
-    </div>
-
-    <h2>Fornecedores Cadastrados</h2>
-    <div id="supplier-list" style="margin-top: 10px;"></div>
-  </div>
-
-  <!-- ABA 3: DASHBOARD -->
-  <div id="view-dashboard" class="view-section">
-    <div class="dash-card">
-      <h3>Filtro do Dashboard</h3>
-      <div class="filter-row" style="margin-top: 10px;">
-        <div class="filter-group">
-          <label for="filter-month">Mês</label>
-          <select id="filter-month" onchange="atualizarDashboard()">
-            <option value="all">Todos os meses</option>
-            <option value="01">Janeiro</option>
-            <option value="02">Fevereiro</option>
-            <option value="03">Março</option>
-            <option value="04">Abril</option>
-            <option value="05">Maio</option>
-            <option value="06">Junho</option>
-            <option value="07">Julho</option>
-            <option value="08">Agosto</option>
-            <option value="09">Setembro</option>
-            <option value="10">Outubro</option>
-            <option value="11">Novembro</option>
-            <option value="12">Dezembro</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="filter-year">Ano</label>
-          <select id="filter-year" onchange="atualizarDashboard()">
-            <option value="all">Todos os anos</option>
-            <!-- Preenchido via JS dinamicamente ou fixo -->
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="dash-card">
-      <h3>Resumo Geral de Gastos</h3>
-      <p class="dash-total" id="dash-total-value">R$ 0,00</p>
-      <p style="font-size: 0.85rem; color: #64748b;" id="dash-period-label">Total acumulado do período selecionado</p>
-    </div>
-
-    <div class="dash-card">
-      <h3>Gastos por Fornecedor</h3>
-      <div id="supplier-spending-list" style="margin-top: 15px;">
-        <!-- Gráficos de barras injetados via JS -->
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let contas = JSON.parse(localStorage.getItem('contas')) || [];
-    let fornecedores = JSON.parse(localStorage.getItem('fornecedores')) || [];
-
-    // Inicializar seletor de anos com base nas contas cadastradas ou ano atual
-    function inicializarFiltroAnos() {
-      const yearSelect = document.getElementById('filter-year');
-      const anosSet = new Set();
-      const anoAtual = new Date().getFullYear();
-      anosSet.add(anoAtual.toString());
-
-      contas.forEach(c => {
-        if (c.data) {
-          const ano = c.data.split('-')[0];
-          anosSet.add(ano);
-        }
-      });
-
-      yearSelect.innerHTML = '<option value="all">Todos os anos</option>';
-      Array.from(anosSet).sort().reverse().forEach(ano => {
-        yearSelect.innerHTML += `<option value="${ano}">${ano}</option>`;
-      });
-
-      // Deixar selecionado o ano atual e mês atual por padrão ao abrir
-      const mesAtual = String(new Date().getMonth() + 1).padStart(2, '0');
-      document.getElementById('filter-month').value = mesAtual;
-      document.getElementById('filter-year').value = anoAtual.toString();
-    }
-
-    // Gerenciamento de Abas
-    function mudarAba(aba) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-
-      if (aba === 'contas') {
-        document.querySelectorAll('.tab')[0].classList.add('active');
-        document.getElementById('view-contas').classList.add('active');
-      } else if (aba === 'fornecedores') {
-        document.querySelectorAll('.tab')[1].classList.add('active');
-        document.getElementById('view-fornecedores').classList.add('active');
-      } else if (aba === 'dashboard') {
-        document.querySelectorAll('.tab')[2].classList.add('active');
-        document.getElementById('view-dashboard').classList.add('active');
-        inicializarFiltroAnos();
-        atualizarDashboard();
-      }
-    }
-
-    // Permissão de Notificação
-    function solicitarNotificacao() {
-      if ('Notification' in window) {
-        Notification.requestPermission().then(permission => {
-          if (permission === 'granted') {
-            alert('Notificações ativadas com sucesso!');
-            document.getElementById('btn-perm').style.display = 'none';
-            verificarVencimentos();
-          } else {
-            alert('Permissão para notificações negada.');
-          }
-        });
-      } else {
-        alert('Este navegador não suporta notificações.');
-      }
-    }
-
-    if ('Notification' in window && Notification.permission === 'granted') {
-      document.getElementById('btn-perm').style.display = 'none';
-    }
-
-    // --- CRUD DE FORNECEDORES ---
-    function salvarFornecedor() {
-      const id = document.getElementById('supplier-id').value;
-      const nome = document.getElementById('supplier-name').value.trim();
-
-      if (!nome) {
-        alert('Insira o nome do fornecedor.');
-        return;
-      }
-
-      if (id) {
-        const sup = fornecedores.find(s => s.id == id);
-        if (sup) sup.nome = nome;
-      } else {
-        fornecedores.push({ id: Date.now(), nome });
-      }
-
-      localStorage.setItem('fornecedores', JSON.stringify(fornecedores));
-      limparFormularioFornecedor();
-      renderizarFornecedores();
-      atualizarSelectFornecedores();
-      renderizarContas();
-    }
-
-    function renderizarFornecedores() {
-      const container = document.getElementById('supplier-list');
-      container.innerHTML = '';
-
-      if (fornecedores.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#64748b;">Nenhum fornecedor cadastrado.</p>';
-        return;
-      }
-
-      fornecedores.forEach(sup => {
-        const item = document.createElement('div');
-        item.className = 'item-card';
-        item.innerHTML = `
-          <div class="item-info">
-            <h3>${sup.nome}</h3>
-          </div>
-          <div class="item-actions">
-            <button class="btn-action" onclick="editarFornecedor(${sup.id})">✏️</button>
-            <button class="btn-action btn-delete" onclick="deletarFornecedor(${sup.id})">🗑️</button>
-          </div>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    function editarFornecedor(id) {
-      const sup = fornecedores.find(s => s.id === id);
-      if (sup) {
-        document.getElementById('supplier-id').value = sup.id;
-        document.getElementById('supplier-name').value = sup.nome;
-        document.getElementById('btn-save-supplier').textContent = 'Atualizar Fornecedor';
-        document.getElementById('btn-cancel-supplier').style.display = 'block';
-      }
-    }
-
-    function deletarFornecedor(id) {
-      if (confirm('Excluir este fornecedor? Contas vinculadas ficarão sem fornecedor.')) {
-        fornecedores = fornecedores.filter(s => s.id !== id);
-        localStorage.setItem('fornecedores', JSON.stringify(fornecedores));
-        renderizarFornecedores();
-        atualizarSelectFornecedores();
-        renderizarContas();
-      }
-    }
-
-    function limparFormularioFornecedor() {
-      document.getElementById('supplier-id').value = '';
-      document.getElementById('supplier-name').value = '';
-      document.getElementById('btn-save-supplier').textContent = 'Cadastrar Fornecedor';
-      document.getElementById('btn-cancel-supplier').style.display = 'none';
-    }
-
-    function atualizarSelectFornecedores() {
-      const select = document.getElementById('bill-supplier');
-      select.innerHTML = '<option value="">Selecione um fornecedor...</option>';
-      fornecedores.forEach(sup => {
-        select.innerHTML += `<option value="${sup.id}">${sup.nome}</option>`;
-      });
-    }
-
-    // --- CRUD DE CONTAS ---
-    function salvarConta() {
-      const id = document.getElementById('bill-id').value;
-      const nome = document.getElementById('bill-name').value.trim();
-      const fornecedorId = document.getElementById('bill-supplier').value;
-      const valor = parseFloat(document.getElementById('bill-value').value);
-      const data = document.getElementById('bill-date').value;
-
-      if (!nome || !fornecedorId || isNaN(valor) || !data) {
-        alert('Por favor, preencha todos os campos e selecione o fornecedor!');
-        return;
-      }
-
-      if (id) {
-        const index = contas.findIndex(c => c.id == id);
-        if (index !== -1) {
-          contas[index] = { ...contas[index], nome, fornecedorId: Number(fornecedorId), valor, data };
-        }
-      } else {
-        contas.push({ id: Date.now(), nome, fornecedorId: Number(fornecedorId), valor, data, paga: false });
-      }
-
-      localStorage.setItem('contas', JSON.stringify(contas));
-      limparFormularioConta();
-      renderizarContas();
-      verificarVencimentos();
-    }
-
-    function renderizarContas() {
-      const listContainer = document.getElementById('bill-list');
-      listContainer.innerHTML = '';
-
-      if (contas.length === 0) {
-        listContainer.innerHTML = '<p style="text-align:center; color:#64748b;">Nenhuma conta cadastrada.</p>';
-        return;
-      }
-
-      const hojeStr = new Date().toISOString().split('T')[0];
-
-      contas.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(conta => {
-        const item = document.createElement('div');
-        
-        let statusClass = 'pending';
-        if (conta.paga) {
-          statusClass = 'paid';
-        } else if (conta.data === hojeStr) {
-          statusClass = 'due-today';
-        }
-
-        item.className = `item-card ${statusClass}`;
-        
-        const [ano, mes, dia] = conta.data.split('-');
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-        
-        const supObj = fornecedores.find(s => s.id === conta.fornecedorId);
-        const nomeFornecedor = supObj ? supObj.nome : 'Sem fornecedor';
-
-        item.innerHTML = `
-          <div class="item-info">
-            <h3>${conta.nome} ${conta.paga ? '✅' : ''}</h3>
-            <p><strong>${nomeFornecedor}</strong> | R$ ${conta.valor.toFixed(2)}</p>
-            <p style="font-size: 0.75rem;">Vence: ${dataFormatada}</p>
-          </div>
-          <div class="item-actions">
-            <button class="btn-action btn-pay" onclick="marcarComoPaga(${conta.id})">${conta.paga ? 'Desfazer' : 'Pagar'}</button>
-            <button class="btn-action" onclick="editarConta(${conta.id})">✏️</button>
-            <button class="btn-action btn-delete" onclick="deletarConta(${conta.id})">🗑️</button>
-          </div>
-        `;
-        listContainer.appendChild(item);
-      });
-    }
-
-    function editarConta(id) {
-      const conta = contas.find(c => c.id === id);
-      if (conta) {
-        document.getElementById('bill-id').value = conta.id;
-        document.getElementById('bill-name').value = conta.nome;
-        document.getElementById('bill-supplier').value = conta.fornecedorId;
-        document.getElementById('bill-value').value = conta.valor;
-        document.getElementById('bill-date').value = conta.data;
-
-        document.getElementById('btn-save-bill').textContent = 'Atualizar Conta';
-        document.getElementById('btn-cancel-bill').style.display = 'block';
-      }
-    }
-
-    function deletarConta(id) {
-      if (confirm('Tem certeza que deseja excluir esta conta?')) {
-        contas = contas.filter(c => c.id !== id);
-        localStorage.setItem('contas', JSON.stringify(contas));
-        renderizarContas();
-      }
-    }
-
-    function marcarComoPaga(id) {
-      const conta = contas.find(c => c.id === id);
-      if (conta) {
-        conta.paga = !conta.paga;
-        localStorage.setItem('contas', JSON.stringify(contas));
-        renderizarContas();
-      }
-    }
-
-    function limparFormularioConta() {
-      document.getElementById('bill-id').value = '';
-      document.getElementById('bill-name').value = '';
-      document.getElementById('bill-supplier').value = '';
-      document.getElementById('bill-value').value = '';
-      document.getElementById('bill-date').value = '';
-      document.getElementById('btn-save-bill').textContent = 'Adicionar Conta';
-      document.getElementById('btn-cancel-bill').style.display = 'none';
-    }
-
-    // --- DASHBOARD COM FILTRO DE MÊS E ANO ---
-    function atualizarDashboard() {
-      const mesSelecionado = document.getElementById('filter-month').value;
-      const anoSelecionado = document.getElementById('filter-year').value;
-
-      let totalGeral = 0;
-      let gastosPorFornecedor = {};
-
-      fornecedores.forEach(sup => {
-        gastosPorFornecedor[sup.id] = { nome: sup.nome, total: 0 };
-      });
-
-      // Filtrar contas de acordo com o mês e ano selecionados
-      const contasFiltradas = contas.filter(c => {
-        if (!c.data) return false;
-        const [anoConta, mesConta] = c.data.split('-');
-
-        const matchAno = (anoSelecionado === 'all' || anoConta === anoSelecionado);
-        const matchMes = (mesSelecionado === 'all' || mesConta === mesSelecionado);
-
-        return matchAno && matchMes;
-      });
-
-      contasFiltradas.forEach(c => {
-        totalGeral += c.valor;
-        if (gastosPorFornecedor[c.fornecedorId]) {
-          gastosPorFornecedor[c.fornecedorId].total += c.valor;
-        } else {
-          if (!gastosPorFornecedor['outros']) {
-            gastosPorFornecedor['outros'] = { nome: 'Outros / Sem Fornecedor', total: 0 };
-          }
-          gastosPorFornecedor['outros'].total += c.valor;
-        }
-      });
-
-      document.getElementById('dash-total-value').textContent = `R$ ${totalGeral.toFixed(2)}`;
-
-      const container = document.getElementById('supplier-spending-list');
-      container.innerHTML = '';
-
-      const chaves = Object.keys(gastosPorFornecedor);
-      if (chaves.length === 0 || totalGeral === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#64748b; font-size: 0.9rem;">Nenhum gasto registrado para o período selecionado.</p>';
-        return;
-      }
-
-      chaves.forEach(key => {
-        const item = gastosPorFornecedor[key];
-        if (item.total > 0) {
-          const porcentagem = totalGeral > 0 ? (item.total / totalGeral) * 100 : 0;
-
-          const barDiv = document.createElement('div');
-          barDiv.className = 'supplier-bar-container';
-          barDiv.innerHTML = `
-            <div class="supplier-bar-info">
-              <span>${item.nome}</span>
-              <span>R$ ${item.total.toFixed(2)} (${porcentagem.toFixed(1)}%)</span>
-            </div>
-            <div class="supplier-bar-bg">
-              <div class="supplier-bar-fill" style="width: ${porcentagem}%"></div>
-            </div>
-          `;
-          container.appendChild(barDiv);
-        }
-      });
-    }
-
-    function verificarVencimentos() {
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
-      const hojeStr = new Date().toISOString().split('T')[0];
-      contas.forEach(conta => {
-        if (!conta.paga && conta.data === hojeStr) {
-          new Notification('⚠️ Conta Vencendo Hoje!', {
-            body: `A conta "${conta.nome}" no valor de R$ ${conta.valor.toFixed(2)} vence hoje.`,
-            icon: 'https://via.placeholder.com/192'
-          });
-        }
-      });
-    }
-
-    // Registro do Service Worker do PWA
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-      `;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
-      navigator.serviceWorker.register(swUrl).catch(err => console.log('SW ERRO:', err));
-    }
-
-    // Inicialização
-    atualizarSelectFornecedores();
-    renderizarFornecedores();
-    renderizarContas();
-    inicializarFiltroAnos();
-    verificarVencimentos();
-  </script>
-</body>
-</html>
+          <option value="">Selecione um fornecedor
